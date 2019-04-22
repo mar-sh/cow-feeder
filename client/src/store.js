@@ -11,7 +11,9 @@ export default new Vuex.Store({
     username: '',
     errorUsername: '',
     errorPassword: '',
-    errorLogin: ''
+    errorLogin: '',
+    rooms: [],
+    activeRooms: []
   },
   mutations: {
     setUsernameError(state, payload) {
@@ -31,10 +33,16 @@ export default new Vuex.Store({
     },
     setErrorLogin(state, payload) {
       state.errorLogin = payload
+    },
+    setRooms(state, payload) {
+      state.rooms = payload;
+    },
+    addActiveRooms(state, payload) {
+      state.activeRooms.push(payload);
     }
   },
   actions: {
-    userRegistration({ commit }, { username, password  }) {
+    userRegistration({ commit }, { username, password }) {
       const data = {
         username: username,
         password: password
@@ -48,22 +56,23 @@ export default new Vuex.Store({
           swal("Register berhasil!!", "Harap LOGIN terlebih dahulu untuk melanjutkan!!", "success")
         })
         .catch((err) => {
-          if (response.data) {
-            if (response.data.username != undefined) {
-              commit('setUsernameError', response.data.username.message)
+          if (err.data) {
+            if (err.data.username != undefined) {
+              commit('setUsernameError', err.data.username.message)
             } else {
               commit('setUsernameError', '')
             }
 
-            if (response.data.password != undefined) {
-              commit('setPasswordError', response.data.password.message)
+            if (err.data.password != undefined) {
+              commit('setPasswordError', err.data.password.message)
             } else {
               commit('setPasswordError', '')
             }
           }
         })
     },
-    userLogin({ commit }, { username, password }) {
+
+    userLogin ({ commit }, { username, password }) {
       const data = {
         username: username,
         password: password
@@ -80,6 +89,7 @@ export default new Vuex.Store({
           for (let i = 0; i < users.length; i++) {
             if (users[i].username == username) {
               if (users[i].password == password) {
+                localStorage.setItem('user', users[i].username)
                 commit('setUsername', users[i].username)
                 router.push('/')
               } else {
@@ -99,6 +109,19 @@ export default new Vuex.Store({
       commit('setRole', '')
       router.push('/')
       swal("Good Bye", "success")
+    },
+
+    getRooms(context) {
+      const dbRef = firebase.collection('Rooms')
+
+      dbRef.onSnapshot(function(querySnapshot) {
+        const rooms = [];
+        querySnapshot.forEach(function(doc) {
+          const room = Object.assign({ id: doc.id }, doc.data())
+          rooms.push(room)
+        })
+        context.commit('setRooms', rooms);
+      });
     }
     
   },
