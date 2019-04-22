@@ -4,7 +4,7 @@
       <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between">
         <div class="navbar-header">
           <router-link to="/">
-            <img src="" alt="Feed The Cow">
+            <img src alt="Feed The Cow">
           </router-link>
           <button
             class="navbar-toggler"
@@ -22,29 +22,98 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="nav navbar-nav ml-auto">
             <li class="nav-item" v-if="!isLogin">
-              <router-link to="/member-area"><a class="nav-link">Login</a></router-link>
+              <router-link to="/member-area">
+                <a class="nav-link">Login</a>
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-toggle="modal" data-target="#roomModal">Create a room</a>
             </li>
             <li class="nav-item" v-if="isLogin">
-              <a class="nav-link" href="#" >Logout</a>
+              <a class="nav-link" href="#">Logout</a>
             </li>
           </ul>
         </div>
       </nav>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="roomModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create a new Room</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Room Name:</label>
+            <input type="text" v-model=roomName class="form-control" id="recipient-name">
+          </div>
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Enter Pin:</label>
+            <input type="number" v-model=roomPin class="form-control" id="recipient-name">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" @click.prevent="createRoom">Start a room</button>
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
+import db from '@/firebase/firebase'
+
 export default {
   name: "MainNavbar",
+  data() {
+    return {
+      roomName: '',
+      roomPin: ''
+    }
+  },
   computed: {
     isLogin(state) {
-      return this.$store.getters.isLogin
+      return this.$store.getters.isLogin;
     }
   },
   methods: {
+    ...mapMutations([
+      'addActiveRooms'
+    ]),
     onClickLogout() {
-      
+
+    },
+    createRoom() {
+      const dbRef = db.collection('Rooms')
+
+      dbRef.add({
+        name: this.roomName,
+        pin: this.roomPin,
+        status: true,
+        players: [],
+        leftPlayerClick: 0,
+        rightPlayerClick: 0,
+        owner: localStorage.getItem('user')
+      })
+        .then((doc) => {
+          this.roomName = '';
+          this.roomPin = '';
+          this.addActiveRooms(doc.id);
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+
     }
   }
 };
@@ -61,5 +130,14 @@ img {
 
 a:active {
   border: none;
+}
+
+input[type='number'] {
+    -moz-appearance:textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
 }
 </style>
