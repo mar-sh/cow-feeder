@@ -14,9 +14,18 @@ export default new Router({
       component: Home
     },
     {
+
       path : '/game',
       name: 'game',
       component : Game
-    }
+    },
+
+      path: '/member-area',
+      name: 'SignInRegister',
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import(/* webpackChunkName: "member-area" */ './views/SignInRegister.vue')
+    },
   ]
 })
