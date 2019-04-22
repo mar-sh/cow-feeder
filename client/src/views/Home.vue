@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home" v-if="$store.state.isLogin" >
     <div class="row">
       <div class="col-6 col-md-4 d-flex justify-content-around mt-5" v-for="(room, index) in rooms" :key="index">
         <RoomCard :room="room" />
@@ -10,7 +10,7 @@
 
 <script>
 // @ is an alias to /src
-import { mapActions, mapState} from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import RoomCard from "@/components/RoomCard";
 
 export default {
