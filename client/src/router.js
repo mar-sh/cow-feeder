@@ -19,7 +19,7 @@ export default new Router({
       name: 'game',
       component : Game
     },
-
+    {
       path: '/member-area',
       name: 'SignInRegister',
       // route level code-splitting
