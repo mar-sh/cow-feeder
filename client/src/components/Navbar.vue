@@ -4,7 +4,7 @@
       <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between">
         <div class="navbar-header">
           <router-link to="/">
-            <img src alt="Feed The Cow">
+            <img style="max-width:50px; max-height:50px;" src="https://img.icons8.com/plasticine/100/000000/cow.png"> FTC
           </router-link>
           <button
             class="navbar-toggler"
@@ -108,6 +108,8 @@ export default {
         rightPlayerClick: 0,
         sekon : 30,
         startTimer : false,
+        pengeklikbutton : [],
+        tampilin : true,
         owner: localStorage.getItem('user')
       })
         .then((doc) => {

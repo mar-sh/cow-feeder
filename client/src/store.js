@@ -116,7 +116,9 @@ export default new Vuex.Store({
     getRooms(context) {
       const dbRef = firebase.collection('Rooms')
 
-      dbRef.onSnapshot(function(querySnapshot) {
+      dbRef
+      .where("tampilin", "==", true)
+      .onSnapshot(function(querySnapshot) {
         const rooms = [];
         querySnapshot.forEach(function(doc) {
           const room = Object.assign({ id: doc.id }, doc.data())
