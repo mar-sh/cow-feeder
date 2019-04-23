@@ -1,15 +1,20 @@
 <template>
   <div id="contsemua" class="container max-width:50vh; min-height:100vh">
-    <button v-if="!twoPlayer" @click="join" type="button" class="btn btn-dark" id="btn1">JOIN</button>
-    <button v-if="twoPlayer" @click="play" type="button" class="btn btn-dark" id="btn1">MAIN</button>
+    <button v-if="twoPlayer" @click="play" type="button" class="btn btn-dark" id="btn1">MAIN BARENG</button>
     <br>
-    {{sekon}}
+    <span v-if="twoPlayer">{{sekon}}</span>
     <div id="SAPI_KIRI" class="d-flex d-flex justify-content-center flex-row bd-highlight mb-3">
       <div class="p-2 bd-highlight">
         <div class="ml-10 p-2 flex-fill bd-highlight justify-content-end">
           <img id="sapi1" style="max-width:150px; max-height:150px " src="../../assets/cow2.png">
           <br>
-          <button @click="inc1" type="button" class="btn btn-dark" id="btn1">MAKAN</button>
+          <button
+            v-if="checkPlayer() == true"
+            @click="inc1"
+            type="button"
+            class="btn btn-dark"
+            id="btn1"
+          >MAKAN</button>
           <br>
           {{peternak_kiri_click}}
           <div class="border mt-2" id="kotakjerami1">
@@ -27,14 +32,16 @@
         </div>
       </div>
       <div class="p-2 bd-highlight">
-        <div
-          v-if="mayStartNow"
-          id="SAPI_KANAN"
-          class="p-2 flex-fill bd-highlight justify-content-start"
-        >
+        <div v-if="status" id="SAPI_KANAN" class="p-2 flex-fill bd-highlight justify-content-start">
           <img id="sapi2" style="max-width:150px; max-height:150px " src="../../assets/cow2.png">
           <br>
-          <button @click="inc2" type="button" class="btn btn-dark" id="btn2">MAKAN</button>
+          <button
+            v-if="checkPlayer() == false"
+            @click="inc2"
+            type="button"
+            class="btn btn-dark"
+            id="btn2"
+          >MAKAN</button>
           <br>
           {{peternak_kanan_click}}
           <div class="border mt-2" id="kotakjerami2">
@@ -56,13 +63,14 @@
 </template>
 
 <script>
-import db from '@/firebase/firebase.js'
-// import firebase from 'firebase'
+import db from "@/firebase/firebase.js";
 
-import { log } from 'util';
+import { log } from "util";
+import { functions } from "firebase";
 export default {
   data() {
     return {
+      playbtn: false,
       sekon: 30,
       pemain: [],
       twoPlayer: false,
@@ -71,30 +79,45 @@ export default {
       total_makanan_kiri: 100,
       peternak_kiri_click: 0,
       peternak_kanan_click: 0,
-      room: {}
+      room: {},
+      status: ""
     };
   },
-  mounted() {
+  created() {
     this.getRoom();
     console.log(this.pemain, "players");
+    this.setScores();
   },
+  computed: {},
   methods: {
+    checkPlayer() {
+      if (this.status == true) {
+        return localStorage.getItem("user") == this.pemain[0];
+      }
+    },
+    isDisabled(input) {
+      console.log(input, "APA INPUTNYA COY???????????");
+      return input;
+    },
     getRoom() {
       const dbRef = db.collection("Rooms");
       dbRef.onSnapshot(querySnapshot => {
         querySnapshot.forEach(doc => {
           console.log(this.$route);
-          if (doc.id === this.$route.params.roomID)
+          if (doc.id === this.$route.params.roomID) {
             this.room = Object.assign({ id: doc.id }, doc.data());
+            this.status = doc.data().status;
+            this.sekon = doc.data().sekon;
+          }
+          console.log(this.sekon, "BERAPA DETIK YA");
         });
         this.pemain = [...this.room.players];
       });
     },
     play() {
-        this.startInterval();
-    },
-    join() {
-      this.pemain.push("player2");
+      console.log(" KE KLIK GK YA");
+      this.playbtn = true;
+      this.startInterval();
     },
     inc1() {
       this.total_makanan_kiri -= 1;
@@ -104,34 +127,26 @@ export default {
       this.total_makanan_kanan -= 1;
       this.peternak_kanan_click += 1;
     },
-     // setScoreLeft() {
-    //   const dbRef = firebase.collection("Rooms");
-    //   dbRef.onSnapshot(querySnapshot => {
-    //     querySnapshot.forEach(doc => {
-    //       if (doc.id === this.$route.params.roomID)
-    //         // this.room = Object.assign({ id: doc.id }, doc.data());
-    //         dbRef.doc(doc.id).update({
-    //           leftPlayerClick: this.peternak_kiri_click
-    //         });
-    //     });
-    //   });
-    // setScoreRight() {
-    //   const dbRef = firebase.collection("Rooms");
-    //   dbRef.onSnapshot(querySnapshot => {
-    //     querySnapshot.forEach(doc => {
-    //       if (doc.id === this.$route.params.roomID)
-    //         // this.room = Object.assign({ id: doc.id }, doc.data());
-    //         dbRef.doc(doc.id).update({
-    //           rightPlayerClick: this.peternak_kanan_click
-    //         });
-    //     });
-    //   });,
+
+    setScores() {
+      db.collection("Rooms").onSnapshot(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          if (doc.id == this.$route.params.roomID) {
+            this.peternak_kiri_click = doc.data().leftPlayerClick;
+            this.peternak_kanan_click = doc.data().rightPlayerClick;
+          }
+        });
+      });
+    },
     startInterval: function() {
       setInterval(() => {
         if (this.sekon == 0) {
           clearInterval(this.startInterval);
         } else {
-          this.sekon = this.sekon - 1;
+          console.log(this.sekon, "disini brp detiknya");
+          db.collection("Rooms")
+            .doc(this.$route.params.roomID)
+            .update({ sekon: this.sekon - 1 });
         }
       }, 1000);
     },
@@ -144,11 +159,36 @@ export default {
       console.log(v.length);
       if (v.length == 2) {
         this.twoPlayer = true;
-        this.mayStartNow = true;
+        this.status = true;
       }
+    },
+    sekon: function(val) {
+      if (val == 0) {
+        if (this.peternak_kiri_click > this.peternak_kanan_click) {
+          console.log(this.pemain[0], "WINS!!!!");
+        } else if (this.peternak_kiri_click < this.peternak_kanan_click) {
+          console.log(this.pemain[1], "WINS!!!!");
+        }
+      } else {
+        console.log(val, "ini di watch?");
+      }
+    },
+    peternak_kiri_click: function(value) {
+      console.log("VALUE BERUBAH KIRI", value);
+
+      db.collection("Rooms")
+        .doc(this.$route.params.roomID)
+        .update({ leftPlayerClick: value });
+    },
+    peternak_kanan_click: function(value) {
+      console.log("VALUE BERUBAH KANAN", value);
+
+      db.collection("Rooms")
+        .doc(this.$route.params.roomID)
+        .update({ rightPlayerClick: value });
     }
   }
-}
+};
 </script>
 
 <style>

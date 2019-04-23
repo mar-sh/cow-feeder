@@ -2,7 +2,11 @@
   <div class="home" v-if="$store.state.isLogin" >
     <div class="row">
       <div class="col-6 col-md-4 d-flex justify-content-around mt-5" v-for="(room, index) in rooms" :key="index">
-        <RoomCard :room="room" />
+        <RoomCard 
+        :id="room.id"
+        :name="room.name"
+        :owner="room.owner"
+        :room="room" />
       </div>
     </div>
   </div>

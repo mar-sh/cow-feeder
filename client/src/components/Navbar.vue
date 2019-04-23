@@ -102,10 +102,11 @@ export default {
       dbRef.add({
         name: this.roomName,
         pin: this.roomPin,
-        status: true,
+        status: false,
         players: [localStorage.getItem('user')],
         leftPlayerClick: 0,
         rightPlayerClick: 0,
+        sekon : 30,
         owner: localStorage.getItem('user')
       })
         .then((doc) => {
