@@ -15,14 +15,14 @@
         type="button"
         class="btn btn-primary"
         data-toggle="modal"
-        data-target="#pinModal"
+        :data-target="`#${id}`"
         data-whatever="Enter pin"
       >Enter Room</button>
     </div>
 
     <div
+      :id="id"
       class="modal fade"
-      id="pinModal"
       tabindex="-1"
       role="dialog"
       aria-labelledby="exampleModalLabel"
@@ -39,7 +39,7 @@
             <form>
               <div class="form-group">
                 <label for="room-pin" class="col-form-label">Enter {{ owner }}'s Room Pin</label>
-                <input type="text" v-model="pin" class="form-control" id="room-pin">
+                <input type="text" v-model="pinlokal" class="form-control" id="room-pin">
               </div>
             </form>
           </div>
@@ -59,43 +59,70 @@
 </template>
 
 <script>
-import db from '@/firebase/firebase'
-import firebase from 'firebase'
+import { mapActions } from "vuex";
+import db from "@/firebase/firebase";
+import firebase from "firebase";
 
 export default {
   name: "RoomCard",
-  props: {
-    room: {
-      type: Object
-    },
-    owner : {
-      type : String
-    },
-     id : {
-      type : String
-    },
-     name : {
-      type : String
-    },
-  },
+  // props: {
+  //   room: {
+  //     type: Object
+  //   },
+  //   owner : {
+  //     type : String
+  //   },
+  //    id : {
+  //     type : String
+  //   },
+  //    name : {
+  //     type : String
+  //   },
+  props: ["id", "name", "pin", "owner"],
   data() {
     return {
-      pin: ""
+      pinlokal: ""
     };
+  },
+  created() {
+    console.log(this.id, this.name, this.pin, this.owner, "???????");
   },
   methods: {
     enterRoom() {
-      const dbRef = db.collection('Rooms')
-     if (this.pin == this.room.pin) {
-      //  const players = [localStorage.getItem('user'), ...room.players];
-        console.log(this.room.id)
-        dbRef.doc(this.room.id).update({
-         players: firebase.firestore.FieldValue.arrayUnion(localStorage.getItem('user')),
-         status : true
-       });
-       this.pin = '';
-       this.$router.push({name: 'room', params:{roomID: this.id}});
-     }
+      const dbRef = db.collection("Rooms");
+
+      dbRef.onSnapshot(querySnapshot => {
+        const rooms = [];
+        querySnapshot.forEach(doc => {
+          if (doc.id == this.id) {
+            if (this.pinlokal == this.pin) {
+              dbRef
+                .doc(this.id)
+                .update({
+                  players: firebase.firestore.FieldValue.arrayUnion(
+                    localStorage.getItem("user")
+                  ),
+                  status: true
+                });
+              this.pinlokal = "";
+              this.$router.push({ name: "room", params: { roomID: this.id } });
+            }
+          }
+        });
+      });
+
+      //   const dbRef = db.collection('Rooms')
+      //  if (this.pinlokal == this.pin) {
+      //   //  const players = [localStorage.getItem('user'), ...room.players];
+      //     dbRef.doc(this.id).update({
+      //      players: firebase.firestore.FieldValue.arrayUnion(localStorage.getItem('user')),
+      //      status : true
+      //    });
+      //    this.pinlokal = '';
+      //    console.log('mau pindah ke link', this.id, '=======+++++++');
+
+      //    this.$router.push({name: 'room', params:{roomID: this.id}});
+      //  }
     }
   }
 };
