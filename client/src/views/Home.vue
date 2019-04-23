@@ -23,9 +23,9 @@ export default {
   components: {
     RoomCard
   },
-  created() {
+  mounted() {
     this.getRooms();
-    console.log(this.$store.state.rooms, 'APAAN YA');
+    console.log('APAAN YA');
     
   },
   methods: {

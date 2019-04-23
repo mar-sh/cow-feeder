@@ -70,6 +70,7 @@ import { functions } from "firebase";
 export default {
   data() {
     return {
+      startTimer : false,
       playbtn: false,
       sekon: 30,
       pemain: [],
@@ -107,17 +108,16 @@ export default {
           if (doc.id === this.$route.params.roomID) {
             this.room = Object.assign({ id: doc.id }, doc.data());
             this.status = doc.data().status;
-            this.sekon = doc.data().sekon;
+            this.pemain = [...this.room.players];
           }
           console.log(this.sekon, "BERAPA DETIK YA");
         });
-        this.pemain = [...this.room.players];
       });
     },
     play() {
       console.log(" KE KLIK GK YA");
       this.playbtn = true;
-      this.startInterval();
+      this.startTimer = true
     },
     inc1() {
       this.total_makanan_kiri -= 1;
@@ -142,13 +142,14 @@ export default {
       setInterval(() => {
         if (this.sekon == 0) {
           clearInterval(this.startInterval);
-        } else {
-          console.log(this.sekon, "disini brp detiknya");
           db.collection("Rooms")
             .doc(this.$route.params.roomID)
             .update({ sekon: this.sekon - 1 });
+        } else {
+          this.sekon -= 1
+          console.log(this.sekon, "disini brp detiknya");
         }
-      }, 1000);
+      }, 1000)
     },
     gameEnd() {
       console.log("waktu habis~~");
@@ -186,6 +187,12 @@ export default {
       db.collection("Rooms")
         .doc(this.$route.params.roomID)
         .update({ rightPlayerClick: value });
+    },
+    startTimer : function(val) {
+      if (this.startTimer) this.startInterval();
+       db.collection("Rooms")
+        .doc(this.$route.params.roomID)
+        .update({ startTimer: true });
     }
   }
 };

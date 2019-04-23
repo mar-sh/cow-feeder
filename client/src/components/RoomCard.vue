@@ -89,6 +89,7 @@ export default {
   },
   methods: {
     enterRoom() {
+      console.log('GUA MASU MASUK');
       const dbRef = db.collection("Rooms");
 
       dbRef.onSnapshot(querySnapshot => {

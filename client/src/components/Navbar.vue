@@ -107,6 +107,7 @@ export default {
         leftPlayerClick: 0,
         rightPlayerClick: 0,
         sekon : 30,
+        startTimer : false,
         owner: localStorage.getItem('user')
       })
         .then((doc) => {
