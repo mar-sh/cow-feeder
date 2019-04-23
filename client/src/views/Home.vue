@@ -1,4 +1,5 @@
 <template>
+
   <div class="home" v-if="$store.state.isLogin" >
     <div class="row">
       <div class="col-6 col-md-4 d-flex justify-content-around mt-5" v-for="(room, index) in this.$store.state.rooms" :key="index">
@@ -8,9 +9,23 @@
         :owner="room.owner"
         :pin="room.pin">
         </RoomCard>
+
+
       </div>
     </div>
+    <div class="main-home" v-else>
+      <div>
+        <img src="http://bestanimations.com/Animals/Mammals/Bulls&Cows/funny-cute-cow-dancing-animation.gif#.XL6R6fmm8os.link" alt="">
+        <img src="https://storage.googleapis.com/gcs-upload-demo/upload/dancing-pig.gif" alt="">
+        <img src="http://bestanimations.com/Animals/Mammals/Bulls&Cows/funny-cute-cow-dancing-animation.gif#.XL6R6fmm8os.link" alt="">
+      </div>
+      <div class="game-title">
+        <img src="https://i.imgur.com/7wZOKeJ.gif" alt="">
+      </div>
+      
+    </div>
   </div>
+  
 </template>
 
 <script>
@@ -40,3 +55,14 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.main-home {
+  margin-top: 7%;
+}
+
+.game-title {
+  margin-top: 7%;
+}
+</style>
+

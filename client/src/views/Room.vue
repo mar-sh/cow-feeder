@@ -1,6 +1,13 @@
 <template>
   <div id="contsemua" class="container max-width:50vh; min-height:100vh">
     <button v-if="twoPlayer" @click="play" type="button" class="btn btn-dark" id="btn1">MAIN BARENG</button>
+
+    <audio controls id="myVideo" autoplay loop  hidden>
+
+      <source src="http://66.90.93.122/ost/bokujou-monogatari-harvest-moon-original-soundtrack/jmayhoyd/01%20-%20title.mp3" type="audio/wav">
+
+    </audio>
+
     <br>
     <span v-if="twoPlayer">{{sekon}}</span>
     <div id="SAPI_KIRI" class="d-flex d-flex justify-content-center flex-row bd-highlight mb-3">
@@ -86,6 +93,10 @@ export default {
   },
   created() {
     this.getRoom();
+    // var audio = new Audio({ src: '.http://66.90.93.122/ost/bokujou-monogatari-harvest-moon-original-soundtrack/jmayhoyd/01%20-%20title.mp3',
+    //             autoplay: true,
+    //             loop: true, })
+    // audio.play() 
     console.log(this.pemain, "players");
     this.setScores();
   },
