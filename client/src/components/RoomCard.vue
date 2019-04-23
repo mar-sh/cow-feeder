@@ -39,13 +39,18 @@
             <form>
               <div class="form-group">
                 <label for="room-pin" class="col-form-label">Enter {{ room.owner }}'s Room Pin</label>
-                <input type="text" v-model=pin class="form-control" id="room-pin">
+                <input type="text" v-model="pin" class="form-control" id="room-pin">
               </div>
             </form>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" data-dismiss="modal" @click.prevent="enterRoom">Join!</button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-dismiss="modal"
+              @click.prevent="enterRoom"
+            >Join!</button>
           </div>
         </div>
       </div>
@@ -54,6 +59,8 @@
 </template>
 
 <script>
+import db from '@/firebase/firebase'
+import firebase from 'firebase'
 
 export default {
   name: "RoomCard",
@@ -64,13 +71,19 @@ export default {
   },
   data() {
     return {
-      pin: '',
-    }
+      pin: ""
+    };
   },
   methods: {
     enterRoom() {
-     if (this.pin === this.room.pin) {
-       this.room.players.push({name: localStorage.getItem('user')});
+      const dbRef = db.collection('Rooms')
+     if (this.pin == this.room.pin) {
+      //  const players = [localStorage.getItem('user'), ...room.players];
+        console.log(this.room.id)
+        dbRef.doc(this.room.id).update({
+         players: firebase.firestore.FieldValue.arrayUnion(localStorage.getItem('user'))
+       });
+       this.pin = '';
        this.$router.push({name: 'room', params:{roomID: this.room.id}});
      }
     }

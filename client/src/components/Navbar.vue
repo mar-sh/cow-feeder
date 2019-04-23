@@ -103,7 +103,7 @@ export default {
         name: this.roomName,
         pin: this.roomPin,
         status: true,
-        players: [],
+        players: [localStorage.getItem('user')],
         leftPlayerClick: 0,
         rightPlayerClick: 0,
         owner: localStorage.getItem('user')

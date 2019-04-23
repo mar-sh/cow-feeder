@@ -56,6 +56,10 @@
 </template>
 
 <script>
+import db from '@/firebase/firebase.js'
+// import firebase from 'firebase'
+
+import { log } from 'util';
 export default {
   data() {
     return {
@@ -66,10 +70,26 @@ export default {
       total_makanan_kanan: 100,
       total_makanan_kiri: 100,
       peternak_kiri_click: 0,
-      peternak_kanan_click: 0
+      peternak_kanan_click: 0,
+      room: {}
     };
   },
+  mounted() {
+    this.getRoom();
+    console.log(this.pemain, "players");
+  },
   methods: {
+    getRoom() {
+      const dbRef = db.collection("Rooms");
+      dbRef.onSnapshot(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          console.log(this.$route);
+          if (doc.id === this.$route.params.roomID)
+            this.room = Object.assign({ id: doc.id }, doc.data());
+        });
+        this.pemain = [...this.room.players];
+      });
+    },
     play() {
         this.startInterval();
     },
@@ -84,6 +104,28 @@ export default {
       this.total_makanan_kanan -= 1;
       this.peternak_kanan_click += 1;
     },
+     // setScoreLeft() {
+    //   const dbRef = firebase.collection("Rooms");
+    //   dbRef.onSnapshot(querySnapshot => {
+    //     querySnapshot.forEach(doc => {
+    //       if (doc.id === this.$route.params.roomID)
+    //         // this.room = Object.assign({ id: doc.id }, doc.data());
+    //         dbRef.doc(doc.id).update({
+    //           leftPlayerClick: this.peternak_kiri_click
+    //         });
+    //     });
+    //   });
+    // setScoreRight() {
+    //   const dbRef = firebase.collection("Rooms");
+    //   dbRef.onSnapshot(querySnapshot => {
+    //     querySnapshot.forEach(doc => {
+    //       if (doc.id === this.$route.params.roomID)
+    //         // this.room = Object.assign({ id: doc.id }, doc.data());
+    //         dbRef.doc(doc.id).update({
+    //           rightPlayerClick: this.peternak_kanan_click
+    //         });
+    //     });
+    //   });,
     startInterval: function() {
       setInterval(() => {
         if (this.sekon == 0) {
@@ -97,20 +139,16 @@ export default {
       console.log("waktu habis~~");
     }
   },
-  created() {
-    this.pemain.push("peternak1");
-    console.log(this.pemain, 'apa???');
-    
-  },
   watch: {
-    pemain: function() {
-      if (this.pemain.length == 2) {
+    pemain: function(v) {
+      console.log(v.length);
+      if (v.length == 2) {
         this.twoPlayer = true;
-        this.mayStartNow = true
+        this.mayStartNow = true;
       }
     }
   }
-};
+}
 </script>
 
 <style>
