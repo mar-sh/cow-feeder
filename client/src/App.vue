@@ -13,12 +13,25 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 import MainNavbar from '@/components/Navbar.vue'
 
 export default {
   name: 'app',
   components: {
     MainNavbar
+  },
+  methods: {
+    ...mapMutations([
+      'setIsLogin'
+    ])
+  },
+  created() {
+    if(localStorage.getItem('user')) {
+      this.setIsLogin(true)
+    } else {
+      this.setIsLogin(false)
+    }
   }
 }
 </script>

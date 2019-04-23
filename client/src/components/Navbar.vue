@@ -21,16 +21,16 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="nav navbar-nav ml-auto">
-            <li class="nav-item" v-if="!isLogin">
+            <li class="nav-item" v-if="!$store.state.isLogin">
               <router-link to="/member-area">
                 <a class="nav-link">Login</a>
               </router-link>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#" data-toggle="modal" data-target="#roomModal">Create a room</a>
+              <a class="nav-link" href="#" data-toggle="modal" v-if="$store.state.isLogin" data-target="#roomModal">Create a room</a>
             </li>
-            <li class="nav-item" v-if="isLogin">
-              <a class="nav-link" href="#">Logout</a>
+            <li class="nav-item" v-if="$store.state.isLogin">
+              <a class="nav-link" @click.prevent="onClickLogout">Logout</a>
             </li>
           </ul>
         </div>
@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapMutations, mapActions} from 'vuex'
 import db from '@/firebase/firebase'
 
 export default {
@@ -90,8 +90,11 @@ export default {
     ...mapMutations([
       'addActiveRooms'
     ]),
+    ...mapActions([
+      'userLogout'
+    ]),
     onClickLogout() {
-
+      this.userLogout()
     },
     createRoom() {
       const dbRef = db.collection('Rooms')
@@ -100,7 +103,7 @@ export default {
         name: this.roomName,
         pin: this.roomPin,
         status: true,
-        players: [],
+        players: [localStorage.getItem('user')],
         leftPlayerClick: 0,
         rightPlayerClick: 0,
         owner: localStorage.getItem('user')
@@ -109,6 +112,7 @@ export default {
           this.roomName = '';
           this.roomPin = '';
           this.addActiveRooms(doc.id);
+          this.$router.push({name: 'room', params: {roomID: doc.id}});
         })
         .catch((err) => {
           console.log(err)

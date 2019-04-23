@@ -13,7 +13,8 @@ export default new Vuex.Store({
     errorPassword: '',
     errorLogin: '',
     rooms: [],
-    activeRooms: []
+    activeRooms: [],
+    isLogin: false
   },
   mutations: {
     setUsernameError(state, payload) {
@@ -90,6 +91,7 @@ export default new Vuex.Store({
             if (users[i].username == username) {
               if (users[i].password == password) {
                 localStorage.setItem('user', users[i].username)
+                commit('setIsLogin', true)
                 commit('setUsername', users[i].username)
                 router.push('/')
               } else {
