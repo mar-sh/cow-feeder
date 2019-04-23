@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <MainNavbar></MainNavbar>
+    <MainNavbar v-if="this.$route.name !== 'room'"></MainNavbar>
     <div class="main">
       <transition
         name="fade"

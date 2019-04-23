@@ -2,10 +2,11 @@
   <div id="contsemua" class="container max-width:50vh; min-height:100vh">
     <button v-if="twoPlayer" @click="play" type="button" class="btn btn-dark" id="btn1">MAIN BARENG</button>
 
-    <audio controls id="myVideo" autoplay loop  hidden>
-
-      <source src="http://66.90.93.122/ost/bokujou-monogatari-harvest-moon-original-soundtrack/jmayhoyd/01%20-%20title.mp3" type="audio/wav">
-
+    <audio controls id="myVideo" autoplay loop hidden>
+      <source
+        src="http://66.90.93.122/ost/bokujou-monogatari-harvest-moon-original-soundtrack/jmayhoyd/01%20-%20title.mp3"
+        type="audio/wav"
+      >
     </audio>
 
     <br>
@@ -70,14 +71,16 @@
 </template>
 
 <script>
+import swal from "sweetalert";
 import db from "@/firebase/firebase.js";
+import firebase from "firebase";
 
 import { log } from "util";
 import { functions } from "firebase";
 export default {
   data() {
     return {
-      startTimer : false,
+      startTimer: false,
       playbtn: false,
       sekon: 30,
       pemain: [],
@@ -88,16 +91,20 @@ export default {
       peternak_kiri_click: 0,
       peternak_kanan_click: 0,
       room: {},
+      pengeklikbutton: [],
       status: ""
     };
   },
   created() {
     this.getRoom();
-    // var audio = new Audio({ src: '.http://66.90.93.122/ost/bokujou-monogatari-harvest-moon-original-soundtrack/jmayhoyd/01%20-%20title.mp3',
-    //             autoplay: true,
-    //             loop: true, })
-    // audio.play() 
-    console.log(this.pemain, "players");
+    var audio = new Audio({
+      src:
+        ".http://66.90.93.122/ost/bokujou-monogatari-harvest-moon-original-soundtrack/jmayhoyd/01%20-%20title.mp3",
+      autoplay: true,
+      loop: true
+    });
+    audio.play();
+    // console.log(this.pemain, "players");
     this.setScores();
   },
   computed: {},
@@ -108,27 +115,37 @@ export default {
       }
     },
     isDisabled(input) {
-      console.log(input, "APA INPUTNYA COY???????????");
+      // console.log(input, "APA INPUTNYA COY???????????");
       return input;
     },
     getRoom() {
       const dbRef = db.collection("Rooms");
       dbRef.onSnapshot(querySnapshot => {
         querySnapshot.forEach(doc => {
-          console.log(this.$route);
+          // console.log(this.$route);
           if (doc.id === this.$route.params.roomID) {
             this.room = Object.assign({ id: doc.id }, doc.data());
             this.status = doc.data().status;
             this.pemain = [...this.room.players];
+            this.pengeklikbutton = [...doc.data().pengeklikbutton];
           }
-          console.log(this.sekon, "BERAPA DETIK YA");
+          // console.log(this.sekon, "BERAPA DETIK YA");
         });
       });
     },
     play() {
-      console.log(" KE KLIK GK YA");
+      // console.log(" KE KLIK GK YA");
       this.playbtn = true;
-      this.startTimer = true
+
+      db.collection("Rooms")
+        .doc(this.$route.params.roomID)
+        .update({
+          pengeklikbutton: firebase.firestore.FieldValue.arrayUnion(
+            localStorage.getItem("user")
+          )
+        });
+
+      // this.startTimer = true //start di db true
     },
     inc1() {
       this.total_makanan_kiri -= 1;
@@ -138,7 +155,10 @@ export default {
       this.total_makanan_kanan -= 1;
       this.peternak_kanan_click += 1;
     },
-
+    suaraSapi() {
+    var audio = new Audio(`http://soundbible.com/mp3/Single Cow-SoundBible.com-2051754137.mp3`)
+    audio.play()
+    },
     setScores() {
       db.collection("Rooms").onSnapshot(querySnapshot => {
         querySnapshot.forEach(doc => {
@@ -157,18 +177,18 @@ export default {
             .doc(this.$route.params.roomID)
             .update({ sekon: this.sekon - 1 });
         } else {
-          this.sekon -= 1
-          console.log(this.sekon, "disini brp detiknya");
+          this.sekon -= 1;
+          // console.log(this.sekon, "disini brp detiknya");
         }
-      }, 1000)
+      }, 1000);
     },
     gameEnd() {
-      console.log("waktu habis~~");
+      // console.log("waktu habis~~");
     }
   },
   watch: {
     pemain: function(v) {
-      console.log(v.length);
+      // console.log(v.length);
       if (v.length == 2) {
         this.twoPlayer = true;
         this.status = true;
@@ -177,33 +197,61 @@ export default {
     sekon: function(val) {
       if (val == 0) {
         if (this.peternak_kiri_click > this.peternak_kanan_click) {
-          console.log(this.pemain[0], "WINS!!!!");
+          db.collection("Rooms")
+              .doc(this.$route.params.roomID)
+              .update({ tampilin: false })
+          // console.log(this.pemain[0], "WINS!!!!");
+          swal(`${this.pemain[0]} WINS!!!!`)
+          .then(() => {
+            this.suaraSapi()
+          })
+          .catch(err => {
+            console.log(err);     
+          })
         } else if (this.peternak_kiri_click < this.peternak_kanan_click) {
-          console.log(this.pemain[1], "WINS!!!!");
+          db.collection("Rooms")
+                .doc(this.$route.params.roomID)
+                .update({ tampilin: false });
+
+          swal(`${this.pemain[1]} WINS!!!!`)
+          .then(() => {
+            this.suaraSapi()
+
+          })
+            .catch(err => {
+              console.log(err);   
+            })
+          }
+          // console.log(this.pemain[1], "WINS!!!!");
+          this.$router.push({name : 'home'})
         }
-      } else {
-        console.log(val, "ini di watch?");
-      }
     },
     peternak_kiri_click: function(value) {
-      console.log("VALUE BERUBAH KIRI", value);
+      // console.log("VALUE BERUBAH KIRI", value);
 
       db.collection("Rooms")
         .doc(this.$route.params.roomID)
         .update({ leftPlayerClick: value });
     },
     peternak_kanan_click: function(value) {
-      console.log("VALUE BERUBAH KANAN", value);
+      // console.log("VALUE BERUBAH KANAN", value);
 
       db.collection("Rooms")
         .doc(this.$route.params.roomID)
         .update({ rightPlayerClick: value });
     },
-    startTimer : function(val) {
-      if (this.startTimer) this.startInterval();
-       db.collection("Rooms")
-        .doc(this.$route.params.roomID)
-        .update({ startTimer: true });
+    startTimer: function(val) {
+      if (this.startTimer) {
+        this.startInterval();
+      }
+    },
+    pengeklikbutton: function(v) {
+      if (v.length == 2) {
+        this.startTimer = true;
+        db.collection("Rooms")
+          .doc(this.$route.params.roomID)
+          .update({ startTimer: true });
+      }
     }
   }
 };

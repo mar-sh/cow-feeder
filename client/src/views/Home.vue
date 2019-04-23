@@ -1,5 +1,7 @@
 <template>
 
+
+<div>
   <div class="home" v-if="$store.state.isLogin" >
     <div class="row">
       <div class="col-6 col-md-4 d-flex justify-content-around mt-5" v-for="(room, index) in this.$store.state.rooms" :key="index">
@@ -9,7 +11,7 @@
         :owner="room.owner"
         :pin="room.pin">
         </RoomCard>
-
+      </div>
 
       </div>
     </div>
